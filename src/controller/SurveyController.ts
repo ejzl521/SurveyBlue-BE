@@ -27,15 +27,14 @@ export class SurveyController {
     }
 
     static getAllSurvey = async (req, res) => {
-        const {user_id, page_number} = req.query;
-        const page_size = 10;
+        const {user_id, page_number, page_size} = req.query;
         const options = {};
-        options['order'] = {id: "DESC"}
+        options["order"] = {id: "DESC"}
         options['relations'] = ["user"]
         if (user_id) {
             options['where'] = {userId: user_id}
         }
-        if (page_number) {
+        if (page_number && page_size) {
             options['skip'] = (page_number - 1) * page_size;
             options['take'] = page_size
         }
@@ -54,7 +53,7 @@ export class SurveyController {
             if (survey.questions[i].type === "img_objective") {
                 const img_count = await getConnection().getRepository(Image)
                     .count({where: {questionId: survey.questions[i].id}})
-                console.log(img_count)
+                console.log(img_count);
                 const question = {...survey.questions[i], img_count: img_count}
                 survey.questions[i] = question;
             }
@@ -86,7 +85,7 @@ export class SurveyController {
             let question: Question = new Question();
             question = item;
             question.survey = survey;
-            const a = await getConnection().getRepository(Question).save(question);
+            await getConnection().getRepository(Question).save(question);
         }
 
         req.send({survey_id: survey.id});
